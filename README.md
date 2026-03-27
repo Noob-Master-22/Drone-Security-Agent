@@ -83,7 +83,7 @@ drone-security-agent/
 
 ### 1. Clone the repository
 ```
-git clone https://github.com/yourusername/drone-security-agent.git
+git clone https://github.com/Noob-Master-22/Drone-Security-Agent.git
 cd drone-security-agent
 ```
 ### 2. Create and activate virtual environment
