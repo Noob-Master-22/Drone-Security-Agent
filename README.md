@@ -2,7 +2,6 @@
 
 An AI-powered drone security monitoring system that processes real video footage frame-by-frame, detects security events using a Vision Language Model (VLM), generates real-time alerts, and answers natural language questions about the session via an intelligent agent.
 
-Built as part of a FlytBase AI Engineer assignment — designed to showcase a production-grade agentic AI pipeline using modern LLM tooling.
 
 ---
 
