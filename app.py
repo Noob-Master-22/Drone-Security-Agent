@@ -132,7 +132,7 @@ with tab1:
             progress_bar.progress(progress)
             status_text.text(f"Processing frame {frame_id + 1} of {total} — {event.zone} | {event.timestamp}")
 
-            frame_display.image(image_path, caption=f"Frame {frame_id} — {event.zone}", use_column_width=True)
+            frame_display.image(image_path, caption=f"Frame {frame_id} — {event.zone}", use_container_width=True)
 
             caption_display.markdown(f"**🔍 VLM Caption:**\n\n_{caption}_")
 
