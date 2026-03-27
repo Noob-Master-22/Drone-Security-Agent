@@ -22,63 +22,7 @@ An AI-powered drone security monitoring system that processes real video footage
 
 ## Architecture
 
-```
-
-Video File (.mp4)
-│
-▼
-┌──────────────────────┐
-│ Frame Extractor │ OpenCV — extracts 1 frame every N seconds
-│ │ Real timestamps from video file metadata
-└──────────┬───────────┘
-│
-▼
-┌──────────────────────────────────────────────┐
-│ Perception Layer │
-│ Zone Identification (Groq Vision) │ "Main Gate"
-│ VLM Caption (Groq Vision LLaMA 4 Scout) │ "White SUV entering..."
-└──────────┬───────────────────────────────────┘
-│
-▼
-┌──────────────────────────────────────────────┐
-│ Structuring Layer │
-│ Caption → Structured JSON Event │ LLaMA 3.3 70B
-│ {object_type, color, model, action, │
-│ suspicious, person_count} │
-└──────────┬───────────────────────────────────┘
-│
-├────────────────────┐
-▼ ▼
-┌────────────────┐ ┌──────────────────┐
-│ SQLite DB │ │ ChromaDB │
-│ events table │ │ vector index │
-│ alerts table │ │ semantic search │
-└───────┬────────┘ └────────┬─────────┘
-│ │
-▼ │
-┌────────────────┐ │
-│ Alert Engine │ │
-│ (rule-based) │ │
-│ HIGH / MEDIUM │ │
-└───────┬────────┘ │
-│ │
-└──────────┬───────────┘
-▼
-┌──────────────────────────────────────────────┐
-│ Security Agent │
-│ Groq Native Tool Calling + Session Memory │
-│ Answers natural language security questions │
-└──────────────────┬───────────────────────────┘
-│
-▼
-┌──────────────────────────────────────────────┐
-│ Streamlit UI │
-│ Tab 1: Live Feed │ Tab 2: Alerts │
-│ Tab 3: Agent Q&A Chat │
-└──────────────────────────────────────────────┘
-
-```
-
+![System Architecture](docs/Arch_1.png)
 ---
 
 ## 🛠️ Tech Stack

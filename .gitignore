@@ -7,3 +7,21 @@ chroma_db/
 drone_security.db
 *.egg-info/
 .DS_Store
+
+# Environment
+.env
+venv/
+__pycache__/
+*.pyc
+
+# Databases (don't push session data)
+drone_security.db
+chroma_db/
+
+# Temp files
+temp_*.mp4
+frames/
+*.mp4
+
+# OS
+.DS_Store
