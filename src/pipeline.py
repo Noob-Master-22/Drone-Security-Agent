@@ -5,7 +5,6 @@ from src.frame_extractor import extract_frames
 from src.vlm_captioner import caption_frame
 from src.parser import parse_caption_to_event
 from src.alert_engine import run_alert_rules
-from src.indexer import index_event
 from src.database import init_db, insert_event, insert_alert, get_daily_summary_data
 from src.models import FrameEvent
 from src.vlm_captioner import caption_frame, identify_zone
@@ -92,7 +91,7 @@ def process_video(
         insert_event(event)
 
         
-        index_event(event)
+        #index_event(event)
 
         
         alerts = run_alert_rules(event)

@@ -24,8 +24,11 @@ def _get_hour(timestamp: str) -> int:
         return 12
 
 
-def _is_night(hour: int) -> bool:
-    
+def _is_night(hour: int, caption: str = "") -> bool:
+    # If VLM explicitly says nighttime in caption, trust it
+    night_keywords = ["night", "nighttime", "dark", "midnight", "after hours", "evening"]
+    if any(kw in caption.lower() for kw in night_keywords):
+        return True
     return hour >= NIGHT_START or hour < NIGHT_END
 
 
@@ -36,11 +39,11 @@ def _is_restricted_zone(zone: str) -> bool:
 
 
 
-def rule_loitering(event: FrameEvent, hour: int) -> Alert | None:
+def rule_loitering(event: FrameEvent, hour: int, caption: str = "") -> Alert | None:
     
     if (
-        event.object_type == "person"
-        and event.action in ["loitering", "standing"]
+        event.object_type in ["person", "human", "individual"]
+        and event.action in ["loitering", "standing", "idle", "waiting", "present"]
         and _is_night(hour)
     ):
         return Alert(
@@ -54,7 +57,7 @@ def rule_loitering(event: FrameEvent, hour: int) -> Alert | None:
     return None
 
 
-def rule_person_at_gate_after_hours(event: FrameEvent, hour: int) -> Alert | None:
+def rule_person_at_gate_after_hours(event: FrameEvent, hour: int, caption:str = "") -> Alert | None:
     
     if (
         event.object_type == "person"
@@ -98,7 +101,7 @@ def rule_repeated_vehicle(event: FrameEvent) -> Alert | None:
             )
     return None
 
-def rule_restricted_zone(event: FrameEvent, hour: int) -> Alert | None:
+def rule_restricted_zone(event: FrameEvent, hour: int, caption: str = "") -> Alert | None:
     
     if _is_restricted_zone(event.zone) and _is_night(hour):
         return Alert(
@@ -141,14 +144,14 @@ def run_alert_rules(event: FrameEvent) -> list[Alert]:
         List of Alert objects (can be empty if no rules fire)
     """
     hour = _get_hour(event.timestamp)
+    caption = event.raw_caption or ""
     alerts = []
 
-    # Run each rule — collect any that return an Alert (not None)
     for rule_fn in [
-        lambda e: rule_loitering(e, hour),
-        lambda e: rule_person_at_gate_after_hours(e, hour),
+        lambda e: rule_loitering(e, hour, caption),
+        lambda e: rule_person_at_gate_after_hours(e, hour, caption),
         lambda e: rule_repeated_vehicle(e),
-        lambda e: rule_restricted_zone(e, hour),
+        lambda e: rule_restricted_zone(e, hour, caption),
         lambda e: rule_suspicious_flag(e),
     ]:
         result = rule_fn(event)

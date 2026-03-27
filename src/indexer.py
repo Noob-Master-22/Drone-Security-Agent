@@ -1,24 +1,19 @@
 import chromadb
 from src.models import FrameEvent
 
-chroma_client = chromadb.PersistentClient(path="./chroma_db")
-
-collection = chroma_client.get_or_create_collection(
-    name="drone_frames",
-    metadata={"hnsw:space": "cosine"}
-)
+COLLECTION_NAME = "drone_frames"
 
 
-def reset_chroma():
-    global chroma_client, collection
-    chroma_client = chromadb.PersistentClient(path="./chroma_db")
-    collection = chroma_client.get_or_create_collection(
-        name="drone_frames",
+def make_chroma_client():
+    client = chromadb.EphemeralClient()
+    collection = client.get_or_create_collection(
+        name=COLLECTION_NAME,
         metadata={"hnsw:space": "cosine"}
     )
+    return client, collection
 
 
-def index_event(event: FrameEvent) -> None:
+def index_event(event: FrameEvent, collection) -> None:
     doc_id = f"frame_{event.frame_id}"
 
     metadata = {
@@ -47,7 +42,7 @@ def index_event(event: FrameEvent) -> None:
         )
 
 
-def semantic_search(query: str, n_results: int = 5, filter_zone: str = None) -> list[dict]:
+def semantic_search(query: str, collection, n_results: int = 5, filter_zone: str = None) -> list[dict]:
     where_filter = {"zone": {"$eq": filter_zone}} if filter_zone else None
 
     results = collection.query(
@@ -69,5 +64,5 @@ def semantic_search(query: str, n_results: int = 5, filter_zone: str = None) -> 
     return output
 
 
-def get_collection_count() -> int:
+def get_collection_count(collection) -> int:
     return collection.count()

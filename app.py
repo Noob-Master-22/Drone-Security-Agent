@@ -7,6 +7,7 @@ from src.agent import build_agent, inject_frame_context
 from src.database import get_all_alerts, get_all_events, init_db, get_daily_summary_data
 from groq import Groq
 from dotenv import load_dotenv
+from src.indexer import make_chroma_client, index_event, semantic_search
 
 
 load_dotenv()
@@ -41,6 +42,9 @@ if "daily_brief" not in st.session_state:
 
 if "security_report" not in st.session_state:
     st.session_state.security_report = None
+    
+if "chroma_collection" not in st.session_state:
+    _, st.session_state.chroma_collection = make_chroma_client()
 
 init_db()
 
@@ -77,15 +81,13 @@ with st.sidebar:
         col2.metric("🟡 MEDIUM", summary["medium_alerts"])
 
    
-    st.divider()
     if st.button("🗑️ Clear Session", use_container_width=True):
-        # Wipe databases
+    # No file operations needed — just create a new in-memory client
+        _, st.session_state.chroma_collection = make_chroma_client()
+
         if os.path.exists("drone_security.db"):
             os.remove("drone_security.db")
-        if os.path.exists("chroma_db"):
-            shutil.rmtree("chroma_db")
 
-        # Reset all session state
         st.session_state.pipeline_done = False
         st.session_state.pipeline_results = []
         st.session_state.chat_history = []
@@ -97,7 +99,6 @@ with st.sidebar:
         init_db()
         st.success("Session cleared. Ready for new video.")
         st.rerun()
-
 
 
 tab1, tab2, tab3 = st.tabs(["📹 Live Feed", "🚨 Alerts", "🤖 Agent Q&A"])
@@ -156,7 +157,9 @@ with tab1:
                         alert_display.info(msg)
             else:
                 alert_display.success("✅ No alerts for this frame")
-
+                
+            index_event(event, st.session_state.chroma_collection)
+            
             inject_frame_context(st.session_state.agent, event, alerts)
 
         with st.spinner("Running pipeline..."):

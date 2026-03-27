@@ -3,7 +3,9 @@ from src.pipeline import process_video, generate_daily_brief
 from src.agent import build_agent, inject_frame_context
 from groq import Groq
 from dotenv import load_dotenv
+from src.indexer import make_chroma_client, index_event
 import os
+
 
 load_dotenv()
 
@@ -23,6 +25,10 @@ def main():
         video_path=args.video,
         every_n_seconds=args.interval
     )
+    
+    _, collection = make_chroma_client()
+    for r in results:
+        index_event(r["event"], collection)
 
     # Generate daily brief
     groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
